@@ -1,5 +1,6 @@
 package com.project.hilt
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -14,11 +15,15 @@ import javax.inject.Inject
 @HiltViewModel
 //This is called constructor injection. The @Inject keyword comes from the Hilt, which enables the framework to find this constructor and inject it with appropriate class instances.
 class MainViewModel @Inject constructor(
-    private val mainRepository: MainRepository
+    private val mainRepository: MainRepository,
+    private val dataRepository: DataRepository,
+    private val dataRepositoryBinds: DataRepositoryBinds
 ) : ViewModel() {
 
     init {
-        getSomeData()
+//        getSomeData()
+        getData()
+        getData2()
     }
 
     private val mutableStateFlow = MutableStateFlow("")
@@ -27,6 +32,26 @@ class MainViewModel @Inject constructor(
     private fun getSomeData() {
         viewModelScope.launch(Dispatchers.IO) {
             mutableStateFlow.emit(mainRepository.getSomeData("DATA"))
+        }
+    }
+
+    private val mutableDataFlow = MutableStateFlow<List<Data>> (listOf())
+    val stateDataFlow: StateFlow<List<Data>> = mutableDataFlow.asStateFlow()
+
+    private fun getData() {
+        viewModelScope.launch(Dispatchers.IO) {
+            Log.i("mLogHilt", "getData: ${dataRepository.getData()}")
+            mutableDataFlow.emit(dataRepository.getData())
+        }
+    }
+
+    private val mutableDataFlow2 = MutableStateFlow<List<Data>> (listOf())
+    val stateDataFlow2: StateFlow<List<Data>> = mutableDataFlow.asStateFlow()
+
+    private fun getData2() {
+        viewModelScope.launch(Dispatchers.IO) {
+            Log.i("mLogHilt", "getDataBinds: ${dataRepositoryBinds.getData2()}")
+            mutableDataFlow.emit(dataRepositoryBinds.getData2())
         }
     }
 }
